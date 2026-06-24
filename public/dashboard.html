@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness Dashboard | FitTrack</title>
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="dashboard.css" />
+  <script>
+    if (!localStorage.getItem("token")) {
+      window.location.href = "login.html";
+    }
+  </script>
+  <style>
+    body.dashboard {
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+  </style>
+</head>
+<body class="dashboard">
+  <!-- Background -->
+  <div class="bg-gradient"></div>
+  <div class="bg-blur-1"></div>
+  <div class="bg-blur-2"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo"><i data-lucide="dumbbell"></i> <span>FitTrack</span></div>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="#" id="logoutBtn" class="nav-logout">Logout</a></li>
+    </ul>
+  </nav>
+
+  <main class="dashboard-main">
+    <!-- ROW 1: Welcome -->
+    <section class="row row-welcome">
+      <header class="card welcome-section">
+        <div class="welcome-header">
+          <div>
+            <p class="welcome-label">Dashboard overview</p>
+            <h1>Welcome back, <span id="user-name">Athlete</span>!</h1>
+          </div>
+          <span class="status-pill"><i data-lucide="flame" class="icon-inline"></i> Streak: <strong id="streak-count">0 days</strong></span>
+        </div>
+        <p class="welcome-subtitle">
+          Your fitness progress at a glance — stay consistent, stay strong!
+        </p>
+        <div class="welcome-tags">
+          <span class="tag">Daily goal: 8,000 steps</span>
+          <span class="tag">
+            Water:
+            <span id="water-tag">0 / 8 glasses</span>
+          </span>
+          <span class="tag">
+            BMI:
+            <span id="bmi-tag">—</span>
+          </span>
+        </div>
+      </header>
+    </section>
+
+    <!-- ROW 2: Charts + Plans -->
+    <section class="row row-charts-plans">
+      <!-- Progress Charts -->
+      <section class="card charts-card">
+        <h2>Progress Charts</h2>
+        <p class="small-text">
+          Visualize your weight trend and weekly activity.
+        </p>
+
+        <div class="charts-grid">
+          <div class="chart-box">
+            <h3>Weight Over Time</h3>
+            <canvas id="weightChart"></canvas>
+          </div>
+          <div class="chart-box">
+            <h3>Calories Burned (Last 7 Days)</h3>
+            <canvas id="caloriesChart"></canvas>
+          </div>
+          <div class="chart-box">
+            <h3>Workout Minutes (Last 7 Days)</h3>
+            <canvas id="minutesChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right column: Meal + Workout plan stacked -->
+      <div class="col col-plans">
+        <!-- Meal Planner -->
+        <section class="card meal-plan-card">
+          <h2>Meal Planner</h2>
+          <p class="small-text">
+            Select your diet preference and view a sample meal plan for the day.
+          </p>
+
+          <div class="plan-controls">
+            <label for="diet-select">Diet:</label>
+            <select id="diet-select">
+              <option value="vegetarian">Vegetarian</option>
+              <option value="keto">Keto</option>
+              <option value="high_protein">High Protein</option>
+            </select>
+            <button id="load-meal-plan" class="btn secondary">Load Meals</button>
+          </div>
+
+          <p id="meal-plan-total" class="small-text"></p>
+
+          <ul id="meal-plan-list" class="plan-list">
+            <!-- JS fills -->
+          </ul>
+        </section>
+
+        <!-- Workout Plan -->
+        <section class="card workout-plan-card">
+          <h2>Weekly Workout Plan</h2>
+          <p class="small-text">
+            Choose a goal and get a structured 7-day workout plan.
+          </p>
+
+          <div class="plan-controls">
+            <label for="goal-select">Goal:</label>
+            <select id="goal-select">
+              <option value="weight_loss">Weight Loss</option>
+              <option value="muscle_gain">Muscle Gain</option>
+              <option value="endurance">Endurance</option>
+            </select>
+            <button id="load-workout-plan" class="btn secondary">Load Plan</button>
+          </div>
+
+          <ul id="workout-plan-list" class="plan-list">
+            <!-- JS fills -->
+          </ul>
+        </section>
+      </div>
+    </section>
+
+    <!-- ROW 3: Stat cards -->
+    <section class="row row-stats">
+      <section class="card stat-card workout">
+        <div class="card-header">
+          <h2><i data-lucide="activity" class="icon-inline" style="color: #6366f1;"></i> Workouts</h2>
+          <span class="pill">Weekly</span>
+        </div>
+        <p class="card-main-metric">
+          Completed: <span class="highlight" id="workouts-completed-count">0</span>
+        </p>
+        <p class="card-sub-text" id="workout-sub-text">No workouts logged this week yet.</p>
+        <button class="btn primary" onclick="document.querySelector('.recent-activity').scrollIntoView({behavior: 'smooth'})">View Logs</button>
+      </section>
+
+      <section class="card stat-card nutrition">
+        <div class="card-header">
+          <h2><i data-lucide="salad" class="icon-inline" style="color: #10b981;"></i> Nutrition</h2>
+          <span class="pill">Today</span>
+        </div>
+        <p class="card-main-metric">
+          Calories: <span class="highlight" id="nutrition-calories-count">0 kcal</span>
+        </p>
+        <p class="card-sub-text">You haven’t added any meals today.</p>
+        <button class="btn primary" onclick="document.getElementById('food-query').focus(); document.getElementById('food-query').scrollIntoView({behavior: 'smooth'})">Check Nutrition</button>
+      </section>
+
+      <section class="card stat-card progress">
+        <div class="card-header">
+          <h2><i data-lucide="trending-up" class="icon-inline" style="color: #ec4899;"></i> Progress</h2>
+          <span class="pill">Monthly</span>
+        </div>
+        <div class="progress-ring">
+          <div class="progress-number" id="monthly-progress-percent">0%</div>
+        </div>
+        <p class="card-sub-text">
+          Goal reached: <span class="highlight" id="monthly-progress-percent-sub">0%</span> of your monthly target.
+        </p>
+        <button class="btn primary" onclick="document.querySelector('.charts-card').scrollIntoView({behavior: 'smooth'})">View Charts</button>
+      </section>
+    </section>
+
+    <!-- ROW 4: Profile + Water / Misc -->
+    <section class="row row-bottom">
+      <!-- Left: Profile + Recent Activity -->
+      <div class="col col-main-left">
+        <section class="card profile-card">
+          <h2><i data-lucide="user" class="icon-inline"></i> Your Fitness Profile</h2>
+          <p class="small-text">
+            Update your body stats to get a more accurate BMI and calorie estimate.
+          </p>
+          <div class="profile-progress-container" style="margin: 15px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px;">
+              <span style="color: var(--text-muted);">Profile Completion</span>
+              <strong id="profile-progress-percent">0%</strong>
+            </div>
+            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+              <div id="profile-progress-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+
+          <form id="profile-form" class="profile-form">
+            <div class="profile-grid">
+              <div class="field">
+                <label for="profile-name">Name</label>
+                <input type="text" id="profile-name" placeholder="Your name" />
+              </div>
+              <div class="field">
+                <label for="profile-age">Age</label>
+                <input type="number" id="profile-age" min="0" placeholder="Years" />
+              </div>
+              <div class="field">
+                <label for="profile-height">Height (cm)</label>
+                <input
+                  type="number"
+                  id="profile-height"
+                  min="0"
+                  placeholder="e.g. 170"
+                />
+              </div>
+              <div class="field">
+                <label for="profile-weight">Weight (kg)</label>
+                <input
+                  type="number"
+                  id="profile-weight"
+                  min="0"
+                  step="0.1"
+                  placeholder="e.g. 65.5"
+                />
+              </div>
+              <div class="field">
+                <label for="profile-gender">Gender</label>
+                <select id="profile-gender">
+                  <option value="">Select</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="profile-activity">Activity Level</label>
+                <select id="profile-activity">
+                  <option value="">Select</option>
+                  <option value="sedentary">Sedentary</option>
+                  <option value="light">Light</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="active">Active</option>
+                  <option value="very_active">Very Active</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn secondary">Save Profile</button>
+          </form>
+
+          <p id="profile-message" class="small-text profile-message"></p>
+
+          <div class="bmi-box">
+            <p><strong>BMI:</strong> <span id="bmi-value">—</span></p>
+            <p class="small-text">
+              Category: <span id="bmi-category">—</span>
+            </p>
+            <p class="small-text">
+              Est. daily calories: <span id="calorie-estimate">—</span> kcal
+            </p>
+          </div>
+        </section>
+
+        <section class="card recent-activity">
+          <div class="section-heading" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h2><i data-lucide="history" class="icon-inline"></i> Recent Activity</h2>
+              <span class="badge" id="activity-badge">No data yet</span>
+            </div>
+            <button id="clear-today-btn" class="btn secondary" style="font-size:0.75rem; padding: 4px 10px; display:flex; align-items:center; gap:4px;"><i data-lucide="trash-2" style="width:14px; height:14px;"></i> Clear Today</button>
+          </div>
+          <p class="empty-state">
+            Once you start logging workouts and meals, your recent activity will
+            show up here.
+          </p>
+          <ul class="activity-list"></ul>
+        </section>
+      </div>
+
+      <!-- Right: Water + Motivation + Nutrition search -->
+      <div class="col col-side-right">
+        <section class="card water-card">
+          <h2><i data-lucide="droplet" class="icon-inline" style="color:#0ea5e9;"></i> Water Intake</h2>
+          <p class="small-text">
+            Stay hydrated! Aim for at least 8 glasses a day.
+          </p>
+ 
+          <div class="water-display">
+            <p class="water-count">
+              <span id="water-count">0</span> / <span id="water-goal">8</span> glasses
+            </p>
+            <div class="water-bar">
+              <div id="water-bar-fill" class="water-bar-fill"></div>
+            </div>
+          </div>
+ 
+          <div class="water-actions" style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 8px;">
+              <button id="water-add-btn" class="btn primary" style="flex: 1;"><i data-lucide="droplet" class="icon-inline"></i> +1 Glass (250ml)</button>
+              <button id="water-add-bottle-btn" class="btn primary" style="flex: 1;"><i data-lucide="droplet" class="icon-inline"></i> +2 Glasses (500ml)</button>
+            </div>
+            <button id="water-reset-btn" class="btn secondary" style="width: 100%;">Reset</button>
+          </div>
+ 
+          <p id="water-message" class="small-text water-message"></p>
+        </section>
+ 
+        <section class="card motivation">
+          <h2>“Discipline beats motivation every single time.”</h2>
+          <p>Track. Improve. Repeat. Let’s make today count!</p>
+          
+          <div class="quick-log-workout-container" style="margin: 20px 0;">
+            <p style="font-weight: 500; font-size: 0.95rem; margin-bottom: 8px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="plus-circle" style="width: 16px; height: 16px; color:#10b981;"></i> Quick Log Activity:
+            </p>
+            <div class="presets-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
+              <button class="btn secondary quick-workout-preset" data-type="Running" data-duration="30" data-calories="300">🏃 Run (30m)</button>
+              <button class="btn secondary quick-workout-preset" data-type="Cycling" data-duration="30" data-calories="240">🚴 Cycle (30m)</button>
+              <button class="btn secondary quick-workout-preset" data-type="Weight Lifting" data-duration="45" data-calories="200">🏋️ Lift (45m)</button>
+              <button class="btn secondary quick-workout-preset" data-type="Yoga" data-duration="30" data-calories="120">🧘 Yoga (30m)</button>
+            </div>
+            
+            <button id="toggle-manual-workout-btn" class="btn secondary" style="width:100%; font-size:0.8rem; padding: 6px 12px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+              <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i> Log Custom Activity
+            </button>
+            
+            <!-- Manual Log Form (Hidden initially) -->
+            <form id="manual-workout-form" class="hidden" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="display:flex; flex-direction:column; gap:4px; text-align: left;">
+                <label for="workout-type" style="font-size:0.8rem; color:var(--text-muted); font-weight: 500;">Activity Type</label>
+                <input type="text" id="workout-type" placeholder="e.g. Walking, Swimming" required style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; color: var(--text-main); font-size:0.85rem;" />
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left;">
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  <label for="workout-duration" style="font-size:0.8rem; color:var(--text-muted); font-weight: 500;">Mins</label>
+                  <input type="number" id="workout-duration" placeholder="e.g. 30" required style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; color: var(--text-main); font-size:0.85rem;" />
+                </div>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  <label for="workout-calories" style="font-size:0.8rem; color:var(--text-muted); font-weight: 500;">Est. kcal</label>
+                  <input type="number" id="workout-calories" placeholder="e.g. 150" required style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; color: var(--text-main); font-size:0.85rem;" />
+                </div>
+              </div>
+              <button type="submit" class="btn primary" style="font-size:0.85rem; padding: 8px 12px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i data-lucide="plus"></i> Save Activity</button>
+            </form>
+            <p id="workout-log-message" class="small-text" style="text-align: center; margin-top: 8px; color: #10b981; min-height: 18px;"></p>
+          </div>
+ 
+          <div class="motivation-footer">
+            <span>Tip of the day:</span>
+            <p>Even a 10-minute walk is better than zero effort. Move a little!</p>
+          </div>
+        </section>
+
+        <section class="card nutrition-tool">
+          <h2><i data-lucide="apple" class="icon-inline" style="color:#ef4444;"></i> Check Food Nutrition</h2>
+          <p class="small-text">
+            Type any food name and see calories, proteins, fats, and more.
+          </p>
+
+          <div class="nutrition-input-row">
+            <input
+              type="text"
+              id="food-query"
+              placeholder="e.g. banana, boiled egg, paneer"
+            />
+            <button id="check-nutrition-btn" class="btn secondary">
+              Check
+            </button>
+          </div>
+
+          <p id="nutrition-error" class="error-text"></p>
+
+          <div id="nutrition-result" class="nutrition-result hidden"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 FitTrack · Made with 💙 for your fitness journey</p>
+  </footer>
+
+  <!-- Charts + main script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="script.js"></script>
+</body>
+</html>

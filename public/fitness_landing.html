@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness Tracker | FitTrack</title>
+
+  <!-- Google Font (optional but makes it look modern) -->
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com" /> -->
+  <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /> -->
+  <!-- <link -->
+    <!-- href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" -->
+    <!-- rel="stylesheet"
+  /> -->
+
+  <link rel="stylesheet" href="landing_page.css" />
+</head>
+<body class="landing">
+  <div class="bg-gradient"></div>
+  <div class="bg-blur-1"></div>
+  <div class="bg-blur-2"></div>
+
+  <nav class="navbar">
+    <div class="nav-left">
+      <h2 class="logo"><i data-lucide="dumbbell"></i> <span>FitTrack</span></h2>
+    </div>
+    <div class="nav-center">
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="dashboard.html">Get Started</a></li>
+      </ul>
+    </div>
+    <div class="nav-right">
+      <a href="login.html" class="nav-btn nav-outline">Login</a>
+      <a href="registration.html" class="nav-btn nav-fill">Sign Up</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-text"> 
+        <h1>        
+          Track Your <span class="highlight">Fitness Journey</span>
+        </h1>
+        <p class="hero-subtitle">
+          Set goals, log activities, and monitor your progress in one simple,
+          powerful dashboard.
+        </p>
+
+        <div class="hero-stats">
+          <div class="stat-card">
+            <h3><i data-lucide="flame" class="icon-inline"></i> 1,500+</h3>
+            <p>Workouts Logged</p>
+          </div>
+          <div class="stat-card">
+            <h3><i data-lucide="target" class="icon-inline"></i> 850+</h3>
+            <p>Goals Achieved</p>
+          </div>
+          <div class="stat-card">
+            <h3><i data-lucide="clock" class="icon-inline"></i> 24/7</h3>
+            <p>Progress Tracking</p>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a href="registration.html" class="btn primary">Get Started Free</a>
+          <a href="login.html" class="btn secondary">Already have an account?</a>
+        </div>
+
+        <p class="hero-note">No credit card required · Cancel anytime</p>
+      </div>
+
+      <div class="hero-img">
+        <div class="hero-img-card">
+          <img
+            src="https://img.freepik.com/free-vector/fitness-tracking-concept-illustration_114360-5211.jpg"
+            alt="Fitness Illustration"
+          />
+          <div class="floating-badge badge-top">
+            ✅ Goal: 10,000 steps
+          </div>
+          <div class="floating-badge badge-bottom">
+            💪 Streak: 7 days
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="features">
+      <h2>Why Use <span>FitTrack?</span></h2>
+      <p class="section-subtitle">
+        Everything you need to stay consistent, motivated, and in control.
+      </p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="bar-chart-2"></i></div>
+          <h3>Progress Tracking</h3>
+          <p>Monitor calories, workouts, and goals with clean, visual reports.</p>
+          <ul>
+            <li>Daily & weekly summaries</li>
+            <li>Calories burned & consumed</li>
+            <li>Workout history at a glance</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="target"></i></div>
+          <h3>Smart Goal Setting</h3>
+          <p>Set realistic goals and let FitTrack keep you on course.</p>
+          <ul>
+            <li>Custom goal creation</li>
+            <li>Goal reminders & nudges</li>
+            <li>Visual goal completion bars</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="smartphone"></i></div>
+          <h3>Simple & Intuitive</h3>
+          <p>Designed for beginners and pros with a clean, modern interface.</p>
+          <ul>
+            <li>Responsive on all devices</li>
+            <li>Fast, minimal layout</li>
+            <li>Easy activity logging</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+<!-- 
+    <section id="about" class="about">
+      <div class="about-card">
+        <h2>Built for Real People</h2>
+        <p>
+          FitTrack is a simple yet powerful fitness tracker built with
+          <strong>Node.js</strong>, <strong>Express</strong>, and
+          <strong>MongoDB</strong>, with a modern frontend to give you a smooth
+          experience.
+        </p>
+        <p>
+          Whether you're just starting out or already deep into your fitness
+          journey, FitTrack helps you stay accountable and see your progress in
+          real time.
+        </p>
+
+        <div class="about-tags">
+          <span class="tag">Node.js</span>
+          <span class="tag">Express</span>
+          <span class="tag">MongoDB</span>
+          <span class="tag">Responsive UI</span>
+        </div>
+
+        <a href="dashboard.html" class="btn tertiary">Open Tracker Dashboard →</a>
+      </div>
+    </section> -->
+
+    <section class="cta">
+      <div class="cta-inner">
+        <div>
+          <h2>Ready to take control of your fitness?</h2>
+          <p>Join FitTrack today and start building healthier habits.</p>
+        </div>
+        <a href="registration.html" class="btn primary large">Create your account</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 FitTrack · All Rights Reserved</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | FitTrack</title>
+
+  <!-- Google Font to match other pages
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  /> -->
+
+  <link rel="stylesheet" href="registration.css" />
+</head>
+<body class="register-page">
+  <!-- Background -->
+  <div class="bg-gradient"></div>
+  <div class="bg-blur-1"></div>
+  <div class="bg-blur-2"></div>
+
+  <!-- Header / logo -->
+  <header class="register-header">
+    <a href="/" class="logo">
+      <i data-lucide="dumbbell"></i> <span>FitTrack</span>
+    </a>
+  </header>
+
+  <!-- Main registration card -->
+  <main class="register-main">
+    <section class="register-card">
+      <div class="register-card-header">
+        <h1>Create your account</h1>
+        <p>Start tracking your workouts, meals, and progress.</p>
+        <p id="error" class="error-text" style="color: #fca5a5; font-size: 0.85rem; margin-top: 10px; text-align: center; min-height: 20px;"></p>
+      </div>
+
+      <form
+        class="register-form"
+        onsubmit="event.preventDefault(); registerUser();"
+      >
+        <label for="name">Name</label>
+        <div class="input-wrapper">
+          <input type="text" id="name" placeholder="Your name" />
+        </div>
+
+        <label for="email">Email</label>
+        <div class="input-wrapper">
+          <input
+            type="email"
+            id="email"
+            placeholder="you@gmail.com or you@gla.ac.in"
+          />
+        </div>
+
+        <!-- Error message area -->
+        <p id="error" class="error-text"></p>
+
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="password"
+            placeholder="At least 6 characters"
+          />
+        </div>
+
+        <button type="submit" class="btn primary">Sign up</button>
+
+        <p class="login-text">
+          Already have an account?
+          <a href="login.html">Log in</a>
+        </p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="register-footer">
+    <p>© 2025 FitTrack · All Rights Reserved</p>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
