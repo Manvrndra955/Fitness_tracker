@@ -65,3 +65,5 @@ mongoose
     );
   })
   .catch((err) => console.error("❌ MongoDB Error:", err));
+
+module.exports = app;
