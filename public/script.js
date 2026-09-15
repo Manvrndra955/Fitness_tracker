@@ -932,11 +932,195 @@ async function handleNutritionSearch() {
   }
 }
 
+/* ===================================================
+   ACTIVITY LOG CLOCK & TIMER FEATURE
+   =================================================== */
+function setupActivityLogClock() {
+  const container = document.querySelector(".activity-timer-box");
+  if (!container) return;
+
+  const typeInput = document.getElementById("activity-clock-type");
+  const minsInput = document.getElementById("activity-clock-mins");
+  const badgeEl = document.getElementById("activity-clock-badge");
+  const digitsEl = document.getElementById("activity-clock-digits");
+  const startBtn = document.getElementById("activity-clock-start-btn");
+  const startIcon = document.getElementById("activity-clock-start-icon");
+  const startText = document.getElementById("activity-clock-start-text");
+  const stopBtn = document.getElementById("activity-clock-stop-btn");
+  const alertBox = document.getElementById("activity-clock-alert");
+  const alertMsg = document.getElementById("activity-clock-alert-msg");
+
+  let clockInterval = null;
+  let clockState = "ready"; // 'ready', 'running', 'paused', 'completed'
+  let totalSeconds = 15 * 60;
+  let remainingSeconds = 15 * 60;
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+
+  function playChime() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
+        gain.gain.setValueAtTime(0.001, ctx.currentTime + i * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + i * 0.12 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.12 + 0.6);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + i * 0.12);
+        osc.stop(ctx.currentTime + i * 0.12 + 0.65);
+      });
+    } catch (e) {
+      console.warn("Audio chime failed:", e);
+    }
+  }
+
+  function readTimeConfig() {
+    let m = parseInt(minsInput ? minsInput.value : "15", 10);
+    if (isNaN(m) || m < 1) m = 1;
+    if (minsInput) minsInput.value = m;
+    totalSeconds = m * 60;
+    remainingSeconds = totalSeconds;
+    renderClock();
+  }
+
+  function renderClock() {
+    if (digitsEl) digitsEl.textContent = formatTime(remainingSeconds);
+    container.classList.remove("running", "paused");
+
+    if (clockState === "ready") {
+      if (badgeEl) {
+        badgeEl.textContent = "Ready";
+        badgeEl.style.color = "#86efac";
+      }
+      if (startText) startText.textContent = "Start Clock";
+      if (startIcon) startIcon.setAttribute("data-lucide", "play");
+    } else if (clockState === "running") {
+      container.classList.add("running");
+      if (badgeEl) {
+        badgeEl.textContent = "Running... ⏱️";
+        badgeEl.style.color = "#4ade80";
+      }
+      if (startText) startText.textContent = "Pause";
+      if (startIcon) startIcon.setAttribute("data-lucide", "pause");
+    } else if (clockState === "paused") {
+      container.classList.add("paused");
+      if (badgeEl) {
+        badgeEl.textContent = "Paused ⏸️";
+        badgeEl.style.color = "#f59e0b";
+      }
+      if (startText) startText.textContent = "Resume";
+      if (startIcon) startIcon.setAttribute("data-lucide", "play");
+    } else if (clockState === "completed") {
+      if (badgeEl) {
+        badgeEl.textContent = "Done ✅";
+        badgeEl.style.color = "#38bdf8";
+      }
+      if (startText) startText.textContent = "Start Again";
+      if (startIcon) startIcon.setAttribute("data-lucide", "play");
+    }
+
+    if (typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  async function handleTimerCompletion() {
+    clearInterval(clockInterval);
+    clockState = "completed";
+    renderClock();
+
+    playChime();
+
+    const type = typeInput ? typeInput.value.trim() || "Workout" : "Workout";
+    const minsDone = Math.max(1, Math.round(totalSeconds / 60));
+    const calories = minsDone * 8; // ~8 kcal/min
+
+    // Show congratulations alert popup
+    alert(`🎉 Congratulations! Workout completed successfully!\n\nYou finished your set time of ${minsDone} mins for ${type}. Great job staying active! 💪`);
+
+    // Show alert banner in UI
+    if (alertMsg) alertMsg.textContent = `You finished your set time of ${minsDone}m for ${type}. The activity log shows work is done!`;
+    if (alertBox) alertBox.classList.remove("hidden");
+
+    // Save and log activity as completed in MongoDB so activity log updates
+    try {
+      await logWorkout(type, minsDone, calories);
+    } catch (err) {
+      console.error("Auto log activity error:", err);
+    }
+  }
+
+  function startClock() {
+    if (clockState === "ready" || clockState === "completed") {
+      readTimeConfig();
+      if (alertBox) alertBox.classList.add("hidden");
+    }
+
+    clockState = "running";
+    renderClock();
+
+    clearInterval(clockInterval);
+    clockInterval = setInterval(() => {
+      if (remainingSeconds > 0) {
+        remainingSeconds--;
+        renderClock();
+      }
+
+      if (remainingSeconds <= 0) {
+        handleTimerCompletion();
+      }
+    }, 1000);
+  }
+
+  function stopClock() {
+    clearInterval(clockInterval);
+    clockState = "ready";
+    if (alertBox) alertBox.classList.add("hidden");
+    readTimeConfig();
+  }
+
+  if (startBtn) {
+    startBtn.addEventListener("click", () => {
+      if (clockState === "ready" || clockState === "paused" || clockState === "completed") {
+        startClock();
+      } else if (clockState === "running") {
+        clearInterval(clockInterval);
+        clockState = "paused";
+        renderClock();
+      }
+    });
+  }
+
+  if (stopBtn) {
+    stopBtn.addEventListener("click", stopClock);
+  }
+
+  if (minsInput) {
+    minsInput.addEventListener("input", () => {
+      if (clockState === "ready" || clockState === "completed") {
+        readTimeConfig();
+      }
+    });
+  }
+
+  readTimeConfig();
+}
+
 /* ===========================
    GLOBAL INITIALIZATION
    =========================== */
 document.addEventListener("DOMContentLoaded", () => {
   setupDashboard();
+  setupActivityLogClock();
 
   // Profile form
   const profileForm = document.getElementById("profile-form");

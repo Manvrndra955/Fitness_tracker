@@ -272,7 +272,7 @@
           </div>
         </section>
 
-        <section class="card recent-activity">
+        <section class="card recent-activity" id="recent-activity-section">
           <div class="section-heading" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
             <div style="display:flex; align-items:center; gap:8px;">
               <h2><i data-lucide="history" class="icon-inline"></i> Recent Activity</h2>
@@ -280,6 +280,56 @@
             </div>
             <button id="clear-today-btn" class="btn secondary" style="font-size:0.75rem; padding: 4px 10px; display:flex; align-items:center; gap:4px;"><i data-lucide="trash-2" style="width:14px; height:14px;"></i> Clear Today</button>
           </div>
+
+          <!-- Activity Log Clock & Timer Widget -->
+          <div class="activity-timer-box" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(74, 222, 128, 0.35); border-radius: 14px; padding: 14px; margin: 14px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="clock" style="width: 16px; height: 16px; color: #4ade80;"></i> Activity Clock & Timer
+              </span>
+              <span class="pill" id="activity-clock-badge" style="background: rgba(74, 222, 128, 0.15); color: #86efac; border: 1px solid rgba(74, 222, 128, 0.4);">Ready</span>
+            </div>
+
+            <!-- Activity Name + Set Desired Time -->
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <label for="activity-clock-type" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 500;">Exercise / Activity</label>
+                <input type="text" id="activity-clock-type" placeholder="e.g. Running, HIIT, Plank" value="Running" style="width: 100%; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-soft); border-radius: 8px; padding: 7px 10px; color: var(--text-main); font-size: 0.85rem;" />
+              </div>
+              <div>
+                <label for="activity-clock-mins" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 500;">Set Desired Time</label>
+                <div style="display: flex; gap: 4px; align-items: center;">
+                  <input type="number" id="activity-clock-mins" min="1" max="180" value="15" placeholder="Mins" style="width: 100%; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-soft); border-radius: 8px; padding: 7px 8px; color: var(--text-main); font-size: 0.85rem; font-weight: 700; text-align: center;" />
+                  <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">min</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Clock Display & Action Buttons -->
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.45); border-radius: 10px; padding: 10px 14px; border: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Countdown Clock</span>
+                <span id="activity-clock-digits" style="font-size: 1.8rem; font-weight: 800; font-family: monospace, sans-serif; color: #4ade80; letter-spacing: 1px;">15:00</span>
+              </div>
+              
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="activity-clock-start-btn" class="btn primary" style="font-size: 0.82rem; padding: 8px 14px; display: flex; align-items: center; gap: 5px; font-weight: 600;">
+                  <i data-lucide="play" id="activity-clock-start-icon" style="width: 14px; height: 14px;"></i>
+                  <span id="activity-clock-start-text">Start Clock</span>
+                </button>
+                <button type="button" id="activity-clock-stop-btn" class="btn secondary" style="font-size: 0.82rem; padding: 8px 12px; display: flex; align-items: center; gap: 4px;">
+                  <i data-lucide="square" style="width: 12px; height: 12px;"></i> Stop
+                </button>
+              </div>
+            </div>
+
+            <!-- Congratulation Alert Banner (Shown when timer ends) -->
+            <div id="activity-clock-alert" class="hidden" style="margin-top: 10px; padding: 10px 12px; background: rgba(74, 222, 128, 0.15); border: 1px solid #4ade80; border-radius: 10px; text-align: center; animation: fadeUp 0.3s ease-out;">
+              <p style="font-weight: 700; color: #4ade80; font-size: 0.9rem; margin-bottom: 2px;">🎉 Congratulations! Workout Done!</p>
+              <p id="activity-clock-alert-msg" style="font-size: 0.8rem; color: var(--text-main); margin: 0;">You finished your set time. The activity log shows work is done!</p>
+            </div>
+          </div>
+
           <p class="empty-state">
             Once you start logging workouts and meals, your recent activity will
             show up here.
@@ -315,7 +365,7 @@
  
           <p id="water-message" class="small-text water-message"></p>
         </section>
- 
+
         <section class="card motivation">
           <h2>“Discipline beats motivation every single time.”</h2>
           <p>Track. Improve. Repeat. Let’s make today count!</p>

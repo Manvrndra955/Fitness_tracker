@@ -892,3 +892,30 @@ footer {
   font-size: 0.8rem;
   font-weight: 600;
 }
+
+/* ===================================================
+   ACTIVITY LOG CLOCK & TIMER
+   =================================================== */
+.activity-timer-box {
+  transition: all var(--transition-med);
+}
+
+.activity-timer-box.running {
+  border-color: rgba(74, 222, 128, 0.7) !important;
+  box-shadow: 0 0 18px rgba(74, 222, 128, 0.2);
+}
+
+.activity-timer-box.running #activity-clock-digits {
+  color: #86efac !important;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+}
+
+.activity-timer-box.paused {
+  border-color: rgba(245, 158, 11, 0.6) !important;
+}
+
+.activity-timer-box.paused #activity-clock-digits {
+  color: #f59e0b !important;
+}
+
+
