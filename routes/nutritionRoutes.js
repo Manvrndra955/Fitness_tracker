@@ -2,22 +2,21 @@
 const express = require("express");
 const router = express.Router();
 
-const NUTRITION_API_KEY = process.env.NUTRITION_API_KEY;
-
 // GET /api/nutrition?food=apple
 router.get("/", async (req, res) => {
   try {
     const food = req.query.food;
+    const apiKey = process.env.NUTRITION_API_KEY;
 
     if (!food) {
       return res.status(400).json({ message: "Food query is required" });
     }
 
-    if (!NUTRITION_API_KEY) {
-      console.error("❌ NUTRITION_API_KEY is not set in .env");
-      return res
-        .status(500)
-        .json({ message: "Nutrition API key not configured on server" });
+    if (!apiKey) {
+      console.error("❌ NUTRITION_API_KEY is not set in environment variables");
+      return res.status(500).json({
+        message: "Nutrition API key is not configured on the server. Please add NUTRITION_API_KEY in Vercel project Environment Variables.",
+      });
     }
 
     const url = `https://api.api-ninjas.com/v1/nutrition?query=${encodeURIComponent(
@@ -27,7 +26,7 @@ router.get("/", async (req, res) => {
     // In Node 18+ (you have v22), fetch is built-in
     const response = await fetch(url, {
       headers: {
-        "X-Api-Key": NUTRITION_API_KEY,
+        "X-Api-Key": apiKey,
       },
     });
 
