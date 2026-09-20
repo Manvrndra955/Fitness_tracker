@@ -70,6 +70,7 @@ body.dashboard {
   align-items: center;
   justify-content: space-between;
   padding: 14px 7%;
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   background: linear-gradient(
     to bottom,
@@ -189,6 +190,7 @@ body.dashboard {
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-soft);
   padding: 18px 20px;
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
 }
 

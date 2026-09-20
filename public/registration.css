@@ -106,6 +106,7 @@ body.register-page {
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-soft);
   padding: 24px 24px 26px;
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   animation: fadeUp 0.8s ease-out;
 }

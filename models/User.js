@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
     age: { type: Number },
     gender: {
       type: String,
-      enum: ["male", "female", "other", ""],
+      enum: ["male", "female", "other",""],
       default: "",
     },
     activityLevel: {

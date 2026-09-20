@@ -7,7 +7,8 @@ const router = express.Router();
 
 // Helper: create JWT
 const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  const secret = process.env.JWT_SECRET || "default_jwt_secret_key";
+  return jwt.sign({ id }, secret, { expiresIn: "1h" });
 };
 
 // ================= REGISTER =================
@@ -63,7 +64,7 @@ router.post("/register", async (req, res) => {
     });
   } catch (err) {
     console.error("Register error:", err);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: err.message || "Server error" });
   }
 });
 
@@ -95,7 +96,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error("Login error:", err);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: err.message || "Server error" });
   }
 });
 
@@ -111,7 +112,8 @@ router.get("/me", async (req, res) => {
       return res.status(401).json({ message: "No token provided" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || "default_jwt_secret_key";
+    const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
