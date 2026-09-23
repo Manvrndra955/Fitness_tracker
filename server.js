@@ -62,6 +62,7 @@ const userRoutes = require("./routes/userRoutes");
 const waterRoutes = require("./routes/waterRoutes");
 const planRoutes = require("./routes/planRoutes");
 const progressRoutes = require("./routes/progressRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);      
@@ -72,6 +73,7 @@ app.use("/api/nutrition", nutritionRoutes);
 app.use("/api/water", waterRoutes);     
 app.use("/api/plans", planRoutes);
 app.use("/api/progress", progressRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Test route
 app.get("/", (req, res) => {

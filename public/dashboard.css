@@ -857,35 +857,13 @@ footer {
   border-color: rgba(239, 68, 68, 0.4);
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
   background: rgba(239, 68, 68, 0.02);
+.activity-item.activity-incomplete {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.03);
 }
 
-.activity-item.activity-completed {
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
-  background: rgba(16, 185, 129, 0.02);
-}
-
-/* Button style for Done button */
-.activity-done-btn {
-  background: linear-gradient(135deg, #ef4444, #f87171);
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
-  transition: all 0.2s ease;
-}
-
-.activity-done-btn:hover {
-  background: linear-gradient(135deg, #dc2626, #ef4444);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.4);
-}
-
-/* Completed badge styling */
+/* Completed and Incomplete badge styling */
 .activity-completed-badge {
   color: #10b981;
   display: flex;
@@ -895,29 +873,381 @@ footer {
   font-weight: 600;
 }
 
+.activity-incomplete-badge {
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Activity Action Buttons: Start, Remove, Cross (Delete) */
+.activity-start-btn {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border: none;
+  color: white;
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 8px rgba(99, 102, 241, 0.3);
+  transition: all 0.2s ease;
+}
+
+.activity-start-btn:hover {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(99, 102, 241, 0.4);
+}
+
+.activity-start-btn.running {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 3px 8px rgba(245, 158, 11, 0.3);
+}
+
+.activity-remove-btn {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.activity-remove-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: #ef4444;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.activity-cross-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text-muted);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.activity-cross-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
 /* ===================================================
-   ACTIVITY LOG CLOCK & TIMER
+   FLOATING AI CHAT WIDGET STYLES (Ultra-Modern Glassmorphism)
    =================================================== */
-.activity-timer-box {
-  transition: all var(--transition-med);
+.chat-widget {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 10000;
 }
 
-.activity-timer-box.running {
-  border-color: rgba(74, 222, 128, 0.7) !important;
-  box-shadow: 0 0 18px rgba(74, 222, 128, 0.2);
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
 }
 
-.activity-timer-box.running #activity-clock-digits {
-  color: #86efac !important;
-  text-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+.chat-toggle-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #10b981);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  animation: pulseGlow 2.5s infinite;
 }
 
-.activity-timer-box.paused {
-  border-color: rgba(245, 158, 11, 0.6) !important;
+.chat-toggle-btn:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 16px 36px rgba(16, 185, 129, 0.6);
 }
 
-.activity-timer-box.paused #activity-clock-digits {
-  color: #f59e0b !important;
+.chat-floating-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: #10b981;
+  color: #050816;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 2px solid #050816;
+  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.4);
+}
+
+.chat-window {
+  width: 380px;
+  height: 520px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(99, 102, 241, 0.15);
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: 76px;
+  right: 0;
+  overflow: hidden;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 480px) {
+  .chat-window {
+    width: calc(100vw - 32px);
+    right: -12px;
+    height: 480px;
+  }
+}
+
+.chat-header {
+  padding: 14px 18px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  background: linear-gradient(120deg, #ffffff, #a5b4fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.chat-status {
+  font-size: 0.72rem;
+  color: #4ade80;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+}
+
+.chat-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chat-close-btn:hover {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.chat-suggestions-bar {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chat-suggestions-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.suggestion-chip {
+  white-space: nowrap;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.suggestion-chip:hover {
+  background: linear-gradient(135deg, #6366f1, #10b981);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.chat-bubble {
+  max-width: 88%;
+  padding: 12px 15px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.bot-bubble {
+  align-self: flex-start;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid #10b981;
+  color: var(--text-main);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.bot-bubble h3 {
+  font-size: 0.9rem;
+  color: #4ade80;
+  margin: 6px 0 4px;
+  font-weight: 700;
+}
+
+.bot-bubble ul, .bot-bubble ol {
+  margin: 6px 0 6px 18px;
+  padding: 0;
+}
+
+.bot-bubble li {
+  margin-bottom: 4px;
+}
+
+.bot-bubble strong {
+  color: #ffffff;
+}
+
+.user-bubble {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.chat-input-row {
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.chat-input-row input {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  transition: border-color 0.2s ease;
+}
+
+.chat-input-row input:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.chat-send-btn {
+  background: linear-gradient(135deg, #4ade80, #10b981);
+  border: none;
+  color: white;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-send-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
 }
 
 

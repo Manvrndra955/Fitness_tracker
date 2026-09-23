@@ -31,6 +31,11 @@ const activitySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    status: {
+      type: String,
+      enum: ["pending", "completed", "incomplete"],
+      default: "pending",
+    },
   },
   {
     timestamps: true,

@@ -679,6 +679,116 @@ async function addWaterGlasses(increment = 1) {
   }
 }
 
+/* ===================================================
+   PER-ACTIVITY TIMER & ACTIONS (Start, Remove, Delete)
+   =================================================== */
+const activeItemTimers = {};
+
+function playChime() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
+      gain.gain.setValueAtTime(0.001, ctx.currentTime + i * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + i * 0.12 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.12 + 0.6);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.65);
+    });
+  } catch (e) {
+    console.warn("Audio chime failed:", e);
+  }
+}
+
+window.toggleActivityTimer = function(id, defaultMins = 15) {
+  const timerBadgeEl = document.getElementById(`timer-display-${id}`);
+  const startBtnEl = document.getElementById(`start-btn-${id}`);
+
+  if (activeItemTimers[id]) {
+    // If running -> pause
+    if (activeItemTimers[id].running) {
+      clearInterval(activeItemTimers[id].interval);
+      activeItemTimers[id].running = false;
+      if (startBtnEl) {
+        startBtnEl.innerHTML = `<i data-lucide="play" style="width:13px; height:13px;"></i> Resume`;
+        startBtnEl.classList.remove("running");
+      }
+      if (timerBadgeEl) {
+        timerBadgeEl.style.color = "#f59e0b";
+      }
+    } else {
+      // If paused -> resume
+      activeItemTimers[id].running = true;
+      startItemInterval(id);
+      if (startBtnEl) {
+        startBtnEl.innerHTML = `<i data-lucide="pause" style="width:13px; height:13px;"></i> Pause`;
+        startBtnEl.classList.add("running");
+      }
+      if (timerBadgeEl) {
+        timerBadgeEl.style.color = "#4ade80";
+      }
+    }
+  } else {
+    // Start fresh timer for this item
+    const initialSeconds = Number(defaultMins) * 60;
+    activeItemTimers[id] = {
+      seconds: initialSeconds > 0 ? initialSeconds : 15 * 60,
+      running: true,
+      interval: null
+    };
+    startItemInterval(id);
+    if (startBtnEl) {
+      startBtnEl.innerHTML = `<i data-lucide="pause" style="width:13px; height:13px;"></i> Pause`;
+      startBtnEl.classList.add("running");
+    }
+    if (timerBadgeEl) {
+      timerBadgeEl.classList.remove("hidden");
+      timerBadgeEl.style.color = "#4ade80";
+    }
+  }
+  if (typeof lucide !== "undefined") lucide.createIcons();
+};
+
+function startItemInterval(id) {
+  if (activeItemTimers[id].interval) clearInterval(activeItemTimers[id].interval);
+  activeItemTimers[id].interval = setInterval(() => {
+    if (!activeItemTimers[id]) return;
+    if (activeItemTimers[id].seconds > 0) {
+      activeItemTimers[id].seconds--;
+      const m = Math.floor(activeItemTimers[id].seconds / 60);
+      const s = activeItemTimers[id].seconds % 60;
+      const formatted = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      
+      const timerBadgeEl = document.getElementById(`timer-display-${id}`);
+      if (timerBadgeEl) {
+        timerBadgeEl.textContent = `⏱️ ${formatted}`;
+        timerBadgeEl.classList.remove("hidden");
+      }
+    } else {
+      clearInterval(activeItemTimers[id].interval);
+      activeItemTimers[id].running = false;
+      const timerBadgeEl = document.getElementById(`timer-display-${id}`);
+      if (timerBadgeEl) {
+        timerBadgeEl.textContent = `🎉 Goal Achieved!`;
+        timerBadgeEl.style.color = "#38bdf8";
+      }
+      playChime();
+      alert(`🎉 Goal Achieved!\n\nCongratulations! You finished your workout goal! 💪`);
+      
+      // Auto complete when timer finishes
+      window.completeActivity(id, true);
+    }
+  }, 1000);
+}
+
 async function loadRecentActivities() {
   const token = getStoredToken();
   const listEl = document.querySelector(".activity-list");
@@ -715,11 +825,11 @@ async function loadRecentActivities() {
     
     if (workoutCountEl) workoutCountEl.textContent = activities.length;
     if (workoutSubTextEl) {
-      workoutSubTextEl.textContent = `Excellent! You completed ${activities.length} workouts.`;
+      workoutSubTextEl.textContent = `Excellent! You logged ${activities.length} workout activities.`;
     }
 
     listEl.innerHTML = activities
-      .slice(0, 5)
+      .slice(0, 10)
       .map((activity) => {
         const dateStr = new Date(activity.date).toLocaleDateString(undefined, {
           month: "short",
@@ -727,21 +837,64 @@ async function loadRecentActivities() {
           hour: "2-digit",
           minute: "2-digit",
         });
-        const isCompleted = activity.completed === true;
-        const statusClass = isCompleted ? "activity-completed" : "activity-pending";
-        const actionHtml = isCompleted
-          ? `<span class="activity-completed-badge"><i data-lucide="check-circle" style="width:16px; height:16px; margin-right:4px;"></i> Done</span>`
-          : `<button class="activity-done-btn" onclick="completeActivity('${activity._id}')">Done</button>`;
+        
+        const isCompleted = activity.completed === true || activity.status === "completed";
+        const isIncomplete = activity.status === "incomplete";
+
+        let statusClass = "activity-pending";
+        if (isCompleted) statusClass = "activity-completed";
+        if (isIncomplete) statusClass = "activity-incomplete";
+
+        const activeTimer = activeItemTimers[activity._id];
+        let timerDisplay = "";
+        let isRunning = false;
+        if (activeTimer) {
+          const m = Math.floor(activeTimer.seconds / 60);
+          const s = activeTimer.seconds % 60;
+          timerDisplay = `⏱️ ${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+          isRunning = activeTimer.running;
+        }
+
+        const startBtnText = isRunning
+          ? `<i data-lucide="pause" style="width:13px; height:13px;"></i> Pause`
+          : activeTimer
+          ? `<i data-lucide="play" style="width:13px; height:13px;"></i> Resume`
+          : `<i data-lucide="play" style="width:13px; height:13px;"></i> Start`;
+
+        let actionButtonsHtml = "";
+
+        if (isCompleted) {
+          actionButtonsHtml = `
+            <span class="activity-completed-badge"><i data-lucide="check-circle" style="width:16px; height:16px;"></i> Goal Achieved! Done</span>
+            <button class="activity-cross-btn" onclick="deleteActivity('${activity._id}')" title="Delete Activity">&times;</button>
+          `;
+        } else if (isIncomplete) {
+          actionButtonsHtml = `
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="activity-incomplete-badge"><i data-lucide="alert-circle" style="width:16px; height:16px;"></i> Incomplete</span>
+              <button id="start-btn-${activity._id}" class="activity-start-btn" onclick="toggleActivityTimer('${activity._id}', ${activity.duration})"><i data-lucide="play" style="width:13px; height:13px;"></i> Restart</button>
+              <button class="activity-cross-btn" onclick="deleteActivity('${activity._id}')" title="Delete Activity">&times;</button>
+            </div>
+          `;
+        } else {
+          actionButtonsHtml = `
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span id="timer-display-${activity._id}" class="activity-timer-badge ${activeTimer ? '' : 'hidden'}" style="font-size:0.8rem; font-weight:700; color:#4ade80;">${timerDisplay}</span>
+              <button id="start-btn-${activity._id}" class="activity-start-btn ${isRunning ? 'running' : ''}" onclick="toggleActivityTimer('${activity._id}', ${activity.duration})">${startBtnText}</button>
+              <button class="activity-remove-btn" onclick="completeActivity('${activity._id}')">Remove</button>
+              <button class="activity-cross-btn" onclick="deleteActivity('${activity._id}')" title="Delete Activity">&times;</button>
+            </div>
+          `;
+        }
 
         return `
-          <li class="activity-item ${statusClass}">
+          <li class="activity-item ${statusClass}" id="activity-item-${activity._id}">
             <div class="activity-item-details">
               <strong>${activity.type}</strong>
-              <span class="activity-item-meta">${activity.duration} mins · ${dateStr}</span>
+              <span class="activity-item-meta">${activity.duration} mins · +${activity.calories || 0} kcal · ${dateStr}</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <span class="activity-item-value">+${activity.calories || 0} kcal</span>
-              ${actionHtml}
+            <div style="display: flex; align-items: center; gap: 8px;">
+              ${actionButtonsHtml}
             </div>
           </li>
         `;
@@ -799,9 +952,56 @@ async function logWorkout(type, duration, calories) {
   }
 }
 
-window.completeActivity = async function(id) {
+window.markActivityIncomplete = async function(id) {
   const token = getStoredToken();
   if (!token) return;
+
+  if (activeItemTimers[id]) {
+    clearInterval(activeItemTimers[id].interval);
+    delete activeItemTimers[id];
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/activities/${id}/incomplete`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    console.log("Activity marked incomplete:", data);
+
+    if (!res.ok) {
+      alert(data.message || "Failed to mark activity incomplete");
+      return;
+    }
+
+    await Promise.all([
+      loadProgressCharts(),
+      loadRecentActivities()
+    ]);
+  } catch (err) {
+    console.error("Mark activity incomplete error:", err);
+  }
+};
+
+window.completeActivity = async function(id, isTimerFinished = false) {
+  const token = getStoredToken();
+  if (!token) return;
+
+  const timer = activeItemTimers[id];
+  const isPremature = !isTimerFinished && (!timer || timer.seconds > 0);
+
+  if (activeItemTimers[id]) {
+    clearInterval(activeItemTimers[id].interval);
+    delete activeItemTimers[id];
+  }
+
+  // If user clicked Remove or stopped before timer finished -> mark as Incomplete
+  if (isPremature) {
+    return window.markActivityIncomplete(id);
+  }
 
   try {
     const res = await fetch(`${API_URL}/activities/${id}/complete`, {
@@ -825,6 +1025,42 @@ window.completeActivity = async function(id) {
     ]);
   } catch (err) {
     console.error("Complete activity error:", err);
+  }
+};
+
+window.deleteActivity = async function(id) {
+  const token = getStoredToken();
+  if (!token) return;
+
+  if (!confirm("Are you sure you want to delete this activity?")) return;
+
+  if (activeItemTimers[id]) {
+    clearInterval(activeItemTimers[id].interval);
+    delete activeItemTimers[id];
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/activities/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    console.log("Activity deleted:", data);
+
+    if (!res.ok) {
+      alert(data.message || "Failed to delete activity");
+      return;
+    }
+
+    await Promise.all([
+      loadProgressCharts(),
+      loadRecentActivities()
+    ]);
+  } catch (err) {
+    console.error("Delete activity error:", err);
   }
 };
 
@@ -932,195 +1168,11 @@ async function handleNutritionSearch() {
   }
 }
 
-/* ===================================================
-   ACTIVITY LOG CLOCK & TIMER FEATURE
-   =================================================== */
-function setupActivityLogClock() {
-  const container = document.querySelector(".activity-timer-box");
-  if (!container) return;
-
-  const typeInput = document.getElementById("activity-clock-type");
-  const minsInput = document.getElementById("activity-clock-mins");
-  const badgeEl = document.getElementById("activity-clock-badge");
-  const digitsEl = document.getElementById("activity-clock-digits");
-  const startBtn = document.getElementById("activity-clock-start-btn");
-  const startIcon = document.getElementById("activity-clock-start-icon");
-  const startText = document.getElementById("activity-clock-start-text");
-  const stopBtn = document.getElementById("activity-clock-stop-btn");
-  const alertBox = document.getElementById("activity-clock-alert");
-  const alertMsg = document.getElementById("activity-clock-alert-msg");
-
-  let clockInterval = null;
-  let clockState = "ready"; // 'ready', 'running', 'paused', 'completed'
-  let totalSeconds = 15 * 60;
-  let remainingSeconds = 15 * 60;
-
-  function formatTime(sec) {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  }
-
-  function playChime() {
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const notes = [523.25, 659.25, 783.99, 1046.5];
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
-        gain.gain.setValueAtTime(0.001, ctx.currentTime + i * 0.12);
-        gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + i * 0.12 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.12 + 0.6);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + i * 0.12);
-        osc.stop(ctx.currentTime + i * 0.12 + 0.65);
-      });
-    } catch (e) {
-      console.warn("Audio chime failed:", e);
-    }
-  }
-
-  function readTimeConfig() {
-    let m = parseInt(minsInput ? minsInput.value : "15", 10);
-    if (isNaN(m) || m < 1) m = 1;
-    if (minsInput) minsInput.value = m;
-    totalSeconds = m * 60;
-    remainingSeconds = totalSeconds;
-    renderClock();
-  }
-
-  function renderClock() {
-    if (digitsEl) digitsEl.textContent = formatTime(remainingSeconds);
-    container.classList.remove("running", "paused");
-
-    if (clockState === "ready") {
-      if (badgeEl) {
-        badgeEl.textContent = "Ready";
-        badgeEl.style.color = "#86efac";
-      }
-      if (startText) startText.textContent = "Start Clock";
-      if (startIcon) startIcon.setAttribute("data-lucide", "play");
-    } else if (clockState === "running") {
-      container.classList.add("running");
-      if (badgeEl) {
-        badgeEl.textContent = "Running... ⏱️";
-        badgeEl.style.color = "#4ade80";
-      }
-      if (startText) startText.textContent = "Pause";
-      if (startIcon) startIcon.setAttribute("data-lucide", "pause");
-    } else if (clockState === "paused") {
-      container.classList.add("paused");
-      if (badgeEl) {
-        badgeEl.textContent = "Paused ⏸️";
-        badgeEl.style.color = "#f59e0b";
-      }
-      if (startText) startText.textContent = "Resume";
-      if (startIcon) startIcon.setAttribute("data-lucide", "play");
-    } else if (clockState === "completed") {
-      if (badgeEl) {
-        badgeEl.textContent = "Done ✅";
-        badgeEl.style.color = "#38bdf8";
-      }
-      if (startText) startText.textContent = "Start Again";
-      if (startIcon) startIcon.setAttribute("data-lucide", "play");
-    }
-
-    if (typeof lucide !== "undefined") lucide.createIcons();
-  }
-
-  async function handleTimerCompletion() {
-    clearInterval(clockInterval);
-    clockState = "completed";
-    renderClock();
-
-    playChime();
-
-    const type = typeInput ? typeInput.value.trim() || "Workout" : "Workout";
-    const minsDone = Math.max(1, Math.round(totalSeconds / 60));
-    const calories = minsDone * 8; // ~8 kcal/min
-
-    // Show congratulations alert popup
-    alert(`🎉 Congratulations! Workout completed successfully!\n\nYou finished your set time of ${minsDone} mins for ${type}. Great job staying active! 💪`);
-
-    // Show alert banner in UI
-    if (alertMsg) alertMsg.textContent = `You finished your set time of ${minsDone}m for ${type}. The activity log shows work is done!`;
-    if (alertBox) alertBox.classList.remove("hidden");
-
-    // Save and log activity as completed in MongoDB so activity log updates
-    try {
-      await logWorkout(type, minsDone, calories);
-    } catch (err) {
-      console.error("Auto log activity error:", err);
-    }
-  }
-
-  function startClock() {
-    if (clockState === "ready" || clockState === "completed") {
-      readTimeConfig();
-      if (alertBox) alertBox.classList.add("hidden");
-    }
-
-    clockState = "running";
-    renderClock();
-
-    clearInterval(clockInterval);
-    clockInterval = setInterval(() => {
-      if (remainingSeconds > 0) {
-        remainingSeconds--;
-        renderClock();
-      }
-
-      if (remainingSeconds <= 0) {
-        handleTimerCompletion();
-      }
-    }, 1000);
-  }
-
-  function stopClock() {
-    clearInterval(clockInterval);
-    clockState = "ready";
-    if (alertBox) alertBox.classList.add("hidden");
-    readTimeConfig();
-  }
-
-  if (startBtn) {
-    startBtn.addEventListener("click", () => {
-      if (clockState === "ready" || clockState === "paused" || clockState === "completed") {
-        startClock();
-      } else if (clockState === "running") {
-        clearInterval(clockInterval);
-        clockState = "paused";
-        renderClock();
-      }
-    });
-  }
-
-  if (stopBtn) {
-    stopBtn.addEventListener("click", stopClock);
-  }
-
-  if (minsInput) {
-    minsInput.addEventListener("input", () => {
-      if (clockState === "ready" || clockState === "completed") {
-        readTimeConfig();
-      }
-    });
-  }
-
-  readTimeConfig();
-}
-
 /* ===========================
    GLOBAL INITIALIZATION
    =========================== */
 document.addEventListener("DOMContentLoaded", () => {
   setupDashboard();
-  setupActivityLogClock();
 
   // Profile form
   const profileForm = document.getElementById("profile-form");
@@ -1185,44 +1237,56 @@ document.addEventListener("DOMContentLoaded", () => {
     loadMealPlan();
   }
 
-  // Workout Presets & Quick Logging
+  // Workout Presets & Custom Activity Training Time Logging
   const presetButtons = document.querySelectorAll(".quick-workout-preset");
+  const typeInput = document.getElementById("workout-type");
+  const durationInput = document.getElementById("workout-duration");
+  const caloriesInput = document.getElementById("workout-calories");
+
+  let currentCalorieRate = 10; // default kcal/min for running
+
+  function updateEstimatedCalories() {
+    if (durationInput && caloriesInput) {
+      const mins = Number(durationInput.value) || 0;
+      caloriesInput.value = Math.round(mins * currentCalorieRate);
+    }
+  }
+
   presetButtons.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       const type = btn.getAttribute("data-type");
-      const duration = Number(btn.getAttribute("data-duration"));
-      const calories = Number(btn.getAttribute("data-calories"));
-      logWorkout(type, duration, calories);
+      const rate = Number(btn.getAttribute("data-rate")) || 8;
+      if (typeInput) typeInput.value = type;
+      currentCalorieRate = rate;
+      updateEstimatedCalories();
     });
   });
 
-  const toggleManualBtn = document.getElementById("toggle-manual-workout-btn");
-  const manualForm = document.getElementById("manual-workout-form");
-  if (toggleManualBtn && manualForm) {
-    toggleManualBtn.addEventListener("click", (e) => {
+  const quickTimeButtons = document.querySelectorAll(".quick-time-btn");
+  quickTimeButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
       e.preventDefault();
-      manualForm.classList.toggle("hidden");
-      if (manualForm.classList.contains("hidden")) {
-        toggleManualBtn.innerHTML = '<i data-lucide="edit-3"></i> Log Custom Activity';
-      } else {
-        toggleManualBtn.innerHTML = '<i data-lucide="chevron-up"></i> Hide Manual Log';
+      const mins = Number(btn.getAttribute("data-mins"));
+      if (durationInput) {
+        durationInput.value = mins;
+        updateEstimatedCalories();
       }
-      lucide.createIcons();
     });
+  });
+
+  if (durationInput) {
+    durationInput.addEventListener("input", updateEstimatedCalories);
   }
 
+  const manualForm = document.getElementById("manual-workout-form");
   if (manualForm) {
     manualForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const type = document.getElementById("workout-type").value.trim();
-      const duration = Number(document.getElementById("workout-duration").value);
-      const calories = Number(document.getElementById("workout-calories").value);
+      const type = typeInput ? typeInput.value.trim() || "Workout" : "Workout";
+      const duration = Number(durationInput ? durationInput.value : 20) || 20;
+      const calories = Number(caloriesInput ? caloriesInput.value : 0) || Math.round(duration * currentCalorieRate);
       logWorkout(type, duration, calories);
-      manualForm.reset();
-      manualForm.classList.add("hidden");
-      toggleManualBtn.innerHTML = '<i data-lucide="edit-3"></i> Log Custom Activity';
-      lucide.createIcons();
     });
   }
 
@@ -1288,8 +1352,179 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Setup Floating AI Chat Coach Widget
+  setupChatWidget();
+
   // Initialize Lucide icons
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
 });
+
+/* ===================================================
+   FLOATING AI CHAT COACH WIDGET
+   =================================================== */
+function setupChatWidget() {
+  const toggleBtn = document.getElementById("chat-toggle-btn");
+  const closeBtn = document.getElementById("chat-close-btn");
+  const chatWindow = document.getElementById("chat-window");
+  const chatForm = document.getElementById("chat-form");
+  const chatInput = document.getElementById("chat-input");
+  const messagesContainer = document.getElementById("chat-messages");
+
+  if (!toggleBtn || !chatWindow) return;
+
+  toggleBtn.addEventListener("click", () => {
+    chatWindow.classList.toggle("hidden");
+    if (!chatWindow.classList.contains("hidden")) {
+      loadChatHistory();
+      if (chatInput) chatInput.focus();
+    }
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      chatWindow.classList.add("hidden");
+    });
+  }
+
+  // Suggestion chips handler
+  const suggestionChips = document.querySelectorAll(".suggestion-chip");
+  suggestionChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const query = chip.getAttribute("data-query");
+      if (query && chatInput) {
+        chatInput.value = query;
+        if (chatForm) {
+          chatForm.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+        }
+      }
+    });
+  });
+
+  async function loadChatHistory() {
+    const token = getStoredToken();
+    if (!token || !messagesContainer) return;
+
+    try {
+      const res = await fetch(`${API_URL}/chat/history`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const history = await res.json();
+      if (res.ok && Array.isArray(history) && history.length > 0) {
+        messagesContainer.innerHTML = history
+          .map(
+            (msg) => `
+            <div class="chat-bubble ${msg.sender === 'user' ? 'user-bubble' : 'bot-bubble'}">
+              ${msg.sender === 'user' ? escapeHtml(msg.message) : formatMarkdown(msg.message)}
+            </div>
+          `
+          )
+          .join("");
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    } catch (e) {
+      console.error("Load chat error:", e);
+    }
+  }
+
+  if (chatForm) {
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      // Append user bubble
+      messagesContainer.innerHTML += `
+        <div class="chat-bubble user-bubble">${escapeHtml(message)}</div>
+      `;
+      chatInput.value = "";
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // Show typing indicator
+      const typingId = "typing-" + Date.now();
+      messagesContainer.innerHTML += `
+        <div class="chat-bubble bot-bubble" id="${typingId}">
+          <em>AI Coach is thinking... 💭</em>
+        </div>
+      `;
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      try {
+        const token = getStoredToken();
+        const res = await fetch(`${API_URL}/chat/send`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ message }),
+        });
+
+        const data = await res.json();
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+
+        if (res.ok && data.message) {
+          messagesContainer.innerHTML += `
+            <div class="chat-bubble bot-bubble">${formatMarkdown(data.message)}</div>
+          `;
+        } else {
+          messagesContainer.innerHTML += `
+            <div class="chat-bubble bot-bubble">Sorry, could not process request right now. Try again!</div>
+          `;
+        }
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      } catch (err) {
+        console.error("Send chat message error:", err);
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        messagesContainer.innerHTML += `
+          <div class="chat-bubble bot-bubble">Network error. Please check connection.</div>
+        `;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    });
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/[&<>"']/g, (m) => {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    }[m];
+  });
+}
+
+function formatMarkdown(str) {
+  if (!str) return "";
+  let html = str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Headers (### Header)
+  html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
+  html = html.replace(/^## (.*$)/gim, "<h3>$1</h3>");
+
+  // Bold (**text**)
+  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+  // Italics (*text*)
+  html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+  // Bullet points
+  html = html.replace(/^\* (.*$)/gim, "• $1");
+  html = html.replace(/^- (.*$)/gim, "• $1");
+
+  // Line breaks
+  html = html.replace(/\n\n/g, "<br/><br/>");
+  html = html.replace(/\n/g, "<br/>");
+
+  return html;
+}

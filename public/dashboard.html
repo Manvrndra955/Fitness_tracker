@@ -145,46 +145,7 @@
       </div>
     </section>
 
-    <!-- ROW 3: Stat cards -->
-    <section class="row row-stats">
-      <section class="card stat-card workout">
-        <div class="card-header">
-          <h2><i data-lucide="activity" class="icon-inline" style="color: #6366f1;"></i> Workouts</h2>
-          <span class="pill">Weekly</span>
-        </div>
-        <p class="card-main-metric">
-          Completed: <span class="highlight" id="workouts-completed-count">0</span>
-        </p>
-        <p class="card-sub-text" id="workout-sub-text">No workouts logged this week yet.</p>
-        <button class="btn primary" onclick="document.querySelector('.recent-activity').scrollIntoView({behavior: 'smooth'})">View Logs</button>
-      </section>
 
-      <section class="card stat-card nutrition">
-        <div class="card-header">
-          <h2><i data-lucide="salad" class="icon-inline" style="color: #10b981;"></i> Nutrition</h2>
-          <span class="pill">Today</span>
-        </div>
-        <p class="card-main-metric">
-          Calories: <span class="highlight" id="nutrition-calories-count">0 kcal</span>
-        </p>
-        <p class="card-sub-text">You haven’t added any meals today.</p>
-        <button class="btn primary" onclick="document.getElementById('food-query').focus(); document.getElementById('food-query').scrollIntoView({behavior: 'smooth'})">Check Nutrition</button>
-      </section>
-
-      <section class="card stat-card progress">
-        <div class="card-header">
-          <h2><i data-lucide="trending-up" class="icon-inline" style="color: #ec4899;"></i> Progress</h2>
-          <span class="pill">Monthly</span>
-        </div>
-        <div class="progress-ring">
-          <div class="progress-number" id="monthly-progress-percent">0%</div>
-        </div>
-        <p class="card-sub-text">
-          Goal reached: <span class="highlight" id="monthly-progress-percent-sub">0%</span> of your monthly target.
-        </p>
-        <button class="btn primary" onclick="document.querySelector('.charts-card').scrollIntoView({behavior: 'smooth'})">View Charts</button>
-      </section>
-    </section>
 
     <!-- ROW 4: Profile + Water / Misc -->
     <section class="row row-bottom">
@@ -273,61 +234,12 @@
         </section>
 
         <section class="card recent-activity" id="recent-activity-section">
-          <div class="section-heading" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <div class="section-heading" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom: 15px;">
             <div style="display:flex; align-items:center; gap:8px;">
               <h2><i data-lucide="history" class="icon-inline"></i> Recent Activity</h2>
               <span class="badge" id="activity-badge">No data yet</span>
             </div>
             <button id="clear-today-btn" class="btn secondary" style="font-size:0.75rem; padding: 4px 10px; display:flex; align-items:center; gap:4px;"><i data-lucide="trash-2" style="width:14px; height:14px;"></i> Clear Today</button>
-          </div>
-
-          <!-- Activity Log Clock & Timer Widget -->
-          <div class="activity-timer-box" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(74, 222, 128, 0.35); border-radius: 14px; padding: 14px; margin: 14px 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
-                <i data-lucide="clock" style="width: 16px; height: 16px; color: #4ade80;"></i> Activity Clock & Timer
-              </span>
-              <span class="pill" id="activity-clock-badge" style="background: rgba(74, 222, 128, 0.15); color: #86efac; border: 1px solid rgba(74, 222, 128, 0.4);">Ready</span>
-            </div>
-
-            <!-- Activity Name + Set Desired Time -->
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px; margin-bottom: 10px;">
-              <div>
-                <label for="activity-clock-type" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 500;">Exercise / Activity</label>
-                <input type="text" id="activity-clock-type" placeholder="e.g. Running, HIIT, Plank" value="Running" style="width: 100%; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-soft); border-radius: 8px; padding: 7px 10px; color: var(--text-main); font-size: 0.85rem;" />
-              </div>
-              <div>
-                <label for="activity-clock-mins" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 500;">Set Desired Time</label>
-                <div style="display: flex; gap: 4px; align-items: center;">
-                  <input type="number" id="activity-clock-mins" min="1" max="180" value="15" placeholder="Mins" style="width: 100%; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-soft); border-radius: 8px; padding: 7px 8px; color: var(--text-main); font-size: 0.85rem; font-weight: 700; text-align: center;" />
-                  <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">min</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Clock Display & Action Buttons -->
-            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.45); border-radius: 10px; padding: 10px 14px; border: 1px solid rgba(255, 255, 255, 0.08);">
-              <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Countdown Clock</span>
-                <span id="activity-clock-digits" style="font-size: 1.8rem; font-weight: 800; font-family: monospace, sans-serif; color: #4ade80; letter-spacing: 1px;">15:00</span>
-              </div>
-              
-              <div style="display: flex; gap: 6px;">
-                <button type="button" id="activity-clock-start-btn" class="btn primary" style="font-size: 0.82rem; padding: 8px 14px; display: flex; align-items: center; gap: 5px; font-weight: 600;">
-                  <i data-lucide="play" id="activity-clock-start-icon" style="width: 14px; height: 14px;"></i>
-                  <span id="activity-clock-start-text">Start Clock</span>
-                </button>
-                <button type="button" id="activity-clock-stop-btn" class="btn secondary" style="font-size: 0.82rem; padding: 8px 12px; display: flex; align-items: center; gap: 4px;">
-                  <i data-lucide="square" style="width: 12px; height: 12px;"></i> Stop
-                </button>
-              </div>
-            </div>
-
-            <!-- Congratulation Alert Banner (Shown when timer ends) -->
-            <div id="activity-clock-alert" class="hidden" style="margin-top: 10px; padding: 10px 12px; background: rgba(74, 222, 128, 0.15); border: 1px solid #4ade80; border-radius: 10px; text-align: center; animation: fadeUp 0.3s ease-out;">
-              <p style="font-weight: 700; color: #4ade80; font-size: 0.9rem; margin-bottom: 2px;">🎉 Congratulations! Workout Done!</p>
-              <p id="activity-clock-alert-msg" style="font-size: 0.8rem; color: var(--text-main); margin: 0;">You finished your set time. The activity log shows work is done!</p>
-            </div>
           </div>
 
           <p class="empty-state">
@@ -371,37 +283,46 @@
           <p>Track. Improve. Repeat. Let’s make today count!</p>
           
           <div class="quick-log-workout-container" style="margin: 20px 0;">
-            <p style="font-weight: 500; font-size: 0.95rem; margin-bottom: 8px; display:flex; align-items:center; gap:6px;">
-              <i data-lucide="plus-circle" style="width: 16px; height: 16px; color:#10b981;"></i> Quick Log Activity:
+            <p style="font-weight: 500; font-size: 0.95rem; margin-bottom: 10px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="plus-circle" style="width: 16px; height: 16px; color:#10b981;"></i> Custom Activity & Training Time:
             </p>
+
+            <!-- Activity Select Presets -->
             <div class="presets-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
-              <button class="btn secondary quick-workout-preset" data-type="Running" data-duration="30" data-calories="300">🏃 Run (30m)</button>
-              <button class="btn secondary quick-workout-preset" data-type="Cycling" data-duration="30" data-calories="240">🚴 Cycle (30m)</button>
-              <button class="btn secondary quick-workout-preset" data-type="Weight Lifting" data-duration="45" data-calories="200">🏋️ Lift (45m)</button>
-              <button class="btn secondary quick-workout-preset" data-type="Yoga" data-duration="30" data-calories="120">🧘 Yoga (30m)</button>
+              <button type="button" class="btn secondary quick-workout-preset" data-type="Running" data-rate="10">🏃 Run</button>
+              <button type="button" class="btn secondary quick-workout-preset" data-type="Cycling" data-rate="8">🚴 Cycle</button>
+              <button type="button" class="btn secondary quick-workout-preset" data-type="Weight Lifting" data-rate="6">🏋️ Lift</button>
+              <button type="button" class="btn secondary quick-workout-preset" data-type="Yoga" data-rate="4">🧘 Yoga</button>
             </div>
             
-            <button id="toggle-manual-workout-btn" class="btn secondary" style="width:100%; font-size:0.8rem; padding: 6px 12px; display: flex; align-items: center; justify-content: center; gap: 4px;">
-              <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i> Log Custom Activity
-            </button>
-            
-            <!-- Manual Log Form (Hidden initially) -->
-            <form id="manual-workout-form" class="hidden" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+            <!-- Custom Activity Form -->
+            <form id="manual-workout-form" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.25); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
               <div style="display:flex; flex-direction:column; gap:4px; text-align: left;">
                 <label for="workout-type" style="font-size:0.8rem; color:var(--text-muted); font-weight: 500;">Activity Type</label>
-                <input type="text" id="workout-type" placeholder="e.g. Walking, Swimming" required style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; color: var(--text-main); font-size:0.85rem;" />
+                <input type="text" id="workout-type" placeholder="e.g. Running, Swimming, Boxing" value="Running" required style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; color: var(--text-main); font-size:0.85rem;" />
               </div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left;">
-                <div style="display:flex; flex-direction:column; gap:4px;">
-                  <label for="workout-duration" style="font-size:0.8rem; color:var(--text-muted); font-weight: 500;">Mins</label>
-                  <input type="number" id="workout-duration" placeholder="e.g. 30" required style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; color: var(--text-main); font-size:0.85rem;" />
-                </div>
-                <div style="display:flex; flex-direction:column; gap:4px;">
-                  <label for="workout-calories" style="font-size:0.8rem; color:var(--text-muted); font-weight: 500;">Est. kcal</label>
-                  <input type="number" id="workout-calories" placeholder="e.g. 150" required style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; color: var(--text-main); font-size:0.85rem;" />
+
+              <!-- Set Training Time -->
+              <div style="display:flex; flex-direction:column; gap:4px; text-align: left;">
+                <label for="workout-duration" style="font-size:0.8rem; color:var(--text-muted); font-weight: 500;">Set Training Time (minutes)</label>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <input type="number" id="workout-duration" min="1" max="300" value="20" placeholder="Mins" required style="width: 80px; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; color: var(--text-main); font-size:0.9rem; font-weight:700; text-align: center;" />
+                  
+                  <div style="display: flex; gap: 4px; flex: 1;">
+                    <button type="button" class="btn secondary quick-time-btn" data-mins="15" style="padding: 6px 8px; font-size: 0.75rem; flex: 1;">15m</button>
+                    <button type="button" class="btn secondary quick-time-btn" data-mins="30" style="padding: 6px 8px; font-size: 0.75rem; flex: 1;">30m</button>
+                    <button type="button" class="btn secondary quick-time-btn" data-mins="45" style="padding: 6px 8px; font-size: 0.75rem; flex: 1;">45m</button>
+                    <button type="button" class="btn secondary quick-time-btn" data-mins="60" style="padding: 6px 8px; font-size: 0.75rem; flex: 1;">60m</button>
+                  </div>
                 </div>
               </div>
-              <button type="submit" class="btn primary" style="font-size:0.85rem; padding: 8px 12px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 4px;"><i data-lucide="plus"></i> Save Activity</button>
+
+              <div style="display:flex; flex-direction:column; gap:4px; text-align: left;">
+                <label for="workout-calories" style="font-size:0.8rem; color:var(--text-muted); font-weight: 500;">Est. Calories (kcal)</label>
+                <input type="number" id="workout-calories" value="200" placeholder="Auto-calculated or custom" style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; color: var(--text-main); font-size:0.85rem;" />
+              </div>
+
+              <button type="submit" class="btn primary" style="font-size:0.85rem; padding: 10px 14px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600;"><i data-lucide="plus-circle" style="width:16px; height:16px;"></i> Add Custom Activity</button>
             </form>
             <p id="workout-log-message" class="small-text" style="text-align: center; margin-top: 8px; color: #10b981; min-height: 18px;"></p>
           </div>
@@ -436,6 +357,56 @@
       </div>
     </section>
   </main>
+
+  <!-- Floating AI Chat Coach Widget -->
+  <div id="chat-widget" class="chat-widget">
+    <!-- Chat Button Trigger -->
+    <button id="chat-toggle-btn" class="chat-toggle-btn" title="FitTrack AI Coach">
+      <div class="chat-btn-pulse"></div>
+      <i data-lucide="sparkles" style="width: 24px; height: 24px; color: #ffffff;"></i>
+      <span class="chat-floating-badge">AI Assistant</span>
+    </button>
+
+    <!-- Chat Drawer Window -->
+    <div id="chat-window" class="chat-window hidden">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <div class="chat-avatar">
+            <i data-lucide="bot" style="width: 20px; height: 20px; color: #4ade80;"></i>
+          </div>
+          <div>
+            <h3>FitTrack AI Coach</h3>
+            <span class="chat-status"><span class="status-dot"></span> Online & Active</span>
+          </div>
+        </div>
+        <button id="chat-close-btn" class="chat-close-btn" title="Close Chat">&times;</button>
+      </div>
+
+      <!-- Quick Suggestion Chips -->
+      <div class="chat-suggestions-bar">
+        <span class="suggestion-chip" data-query="Give me a 3-day workout routine for beginners">🏋️ Workout Plan</span>
+        <span class="suggestion-chip" data-query="What are high protein meal options for fitness?">🥗 High Protein</span>
+        <span class="suggestion-chip" data-query="How much water should I drink during workouts?">💧 Hydration</span>
+        <span class="suggestion-chip" data-query="Best strategies to burn fat and lose weight">🔥 Fat Loss</span>
+      </div>
+
+      <!-- Messages Container -->
+      <div id="chat-messages" class="chat-messages">
+        <div class="chat-bubble bot-bubble">
+          👋 <strong>Hi! I'm your FitTrack AI Coach.</strong><br/>
+          Ask me anything about workouts, diet, fat loss, or nutrition! You can also tap any of the quick suggestion chips above.
+        </div>
+      </div>
+
+      <!-- Input Box -->
+      <form id="chat-form" class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Type your fitness question..." autocomplete="off" />
+        <button type="submit" class="chat-send-btn" title="Send message">
+          <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+        </button>
+      </form>
+    </div>
+  </div>
 
   <footer>
     <p>© 2025 FitTrack · Made with 💙 for your fitness journey</p>

@@ -61,8 +61,8 @@ router.put("/:id/complete", async (req, res) => {
   try {
     const activity = await Activity.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
-      { completed: true },
-      { new: true }
+      { completed: true, status: "completed" },
+      { returnDocument: "after" }
     );
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
@@ -71,6 +71,41 @@ router.put("/:id/complete", async (req, res) => {
   } catch (err) {
     console.error("Error completing activity:", err);
     res.status(500).json({ message: "Failed to complete activity" });
+  }
+});
+
+// PUT /api/activities/:id/incomplete  → Mark activity as incomplete
+router.put("/:id/incomplete", async (req, res) => {
+  try {
+    const activity = await Activity.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
+      { completed: false, status: "incomplete" },
+      { returnDocument: "after" }
+    );
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+    res.json(activity);
+  } catch (err) {
+    console.error("Error marking activity incomplete:", err);
+    res.status(500).json({ message: "Failed to mark activity incomplete" });
+  }
+});
+
+// DELETE /api/activities/:id  → Delete single activity
+router.delete("/:id", async (req, res) => {
+  try {
+    const activity = await Activity.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.userId,
+    });
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+    res.json({ message: "Activity deleted successfully", id: req.params.id });
+  } catch (err) {
+    console.error("Error deleting activity:", err);
+    res.status(500).json({ message: "Failed to delete activity" });
   }
 });
 
